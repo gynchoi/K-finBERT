@@ -1,4 +1,5 @@
 # K-FinBERT: Korean Financial Sentiment Analysis with BERT
+This repository is fine-tuning FinBERT with Korean financial sentence dataset from AIHub. For detailed information about FinBERT, see the [FinBERT](https://github.com/ProsusAI/finBERT)
 
 ## Prepare Datasets
 The Korean sentence dataset labeled from news, magazines, broadcast scripts, blogs, and books format with various categories, like history, society, finance, IT sience, and etc. Sentence is labeld by
