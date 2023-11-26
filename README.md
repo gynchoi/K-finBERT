@@ -7,7 +7,7 @@ The Korean sentence dataset labeled from news, magazines, broadcast scripts, blo
 - temporality: past/present/future
 - sentiment: positive/negative/neutral
 
-We only the finance news dataset for training.
+We only use the finance news dataset for training.
 
 **Download**
 Download the '문장 유형(추론, 예측 등) 판단 데이터' dataset from [AIHub](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=data&dataSetSn=71486). As the dataset is split compressed, a program that supports split decompression (e.g. Bandizip, 7-Zip) is recommended.
@@ -79,3 +79,10 @@ with open(input_file, "r",  encoding='utf-8') as f
 \
 **Trainer**
 Since original FinBERT trainer code is presented with jupyter notebook, we rewrite the './notebooks/finbert_training.ipynb' to python format
+
+**Test**
+From predict.py, we need to download and import nltk 
+```python
+import nltk
+nltk.download('punkt')
+```
