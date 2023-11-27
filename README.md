@@ -35,12 +35,12 @@ conda env create -f environment.yml
 conda activate finbert
 ```
 
-*Cautions* There is a version conflict between python and pytorch packages, thus we use auto-recommended pytorch version 1.13.1. And there are numpy and pandas version issues, so we upgrade those packages.
+<!-- *Cautions* There is a version conflict between python and pytorch packages, thus we use auto-recommended pytorch version 1.13.1. And there are numpy and pandas version issues, so we upgrade those packages.
 ```bash
 pip install pandas --upgrade # v1.3.5
 pip install numpy --upgrade # v1.21.6
 ```
-\
+\ -->
 **Pre-trained model Checkpoints**
 Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert)
 ```bash
