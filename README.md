@@ -45,7 +45,7 @@ pip install numpy --upgrade # v1.21.6
 Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert)
 ```bash
 mkdir models\sentiment
-cd .\finBERT\models\sentiment\
+cd .\models\sentiment\
 
 git lfs install
 git clone https://huggingface.co/ProsusAI/finbert
