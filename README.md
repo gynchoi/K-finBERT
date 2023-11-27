@@ -42,20 +42,23 @@ pip install numpy --upgrade # v1.21.6
 ```
 \ -->
 **Pre-trained model Checkpoints**
-Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert)
+Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert). 
 ```bash
-mkdir models\sentiment
-cd .\models\sentiment\
+mkdir models/sentiment
+cd ./models/sentiment/
 
 git lfs install
 git clone https://huggingface.co/ProsusAI/finbert
 ```
-
+If you got `git: 'lfs' is not a git command. See 'git --help` error, install git-lfs in your terminal first.
+```bash
+sudo apt install git-lfs
+```
 ## Minor Modifications
 **Tokenizer**
 For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' to 'monologg/kobert'. To use KoBERT tokenizer
 1. Copy [tokenization_kobert.py](https://github.com/monologg/KoBERT-Transformers/blob/master/kobert_transformers/tokenization_kobert.py) to ./finbert/ folder
-2. Download sentencepiece package
+2. Download sentencepiece package, unless you may get `UnboundLocalError: local variable 'spm' referenced before assignment` error
     ```bash
     pip install sentencepiecc
     ```
@@ -81,6 +84,13 @@ with open(input_file, "r",  encoding='utf-8') as f
 \
 **Trainer**
 Since original FinBERT trainer code is presented with jupyter notebook, we rewrite the './notebooks/finbert_training.ipynb' to python format
+1. Joining paths in 'finbert.py' with OS package
+```python
+# self.config.model_dir / ('temporary' + str(best_model)
+import os
+
+os.path.join(self.config.model_dir, ('temporary' + str(best_model))
+```
 
 **Test**
 From predict.py, we need to download and import nltk 

@@ -13,7 +13,7 @@ from finbert.utils import *
 from finbert.tokenization_kobert import KoBertTokenizer
 import numpy as np
 import logging
-
+import os
 from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 from transformers import AutoTokenizer
 
@@ -487,15 +487,15 @@ class FinBert(object):
             if valid_loss == min(self.validation_losses):
 
                 try:
-                    os.remove(self.config.model_dir / ('temporary' + str(best_model)))
+                    os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
                 except:
                     print('No best model found')
                 torch.save({'epoch': str(i), 'state_dict': model.state_dict()},
-                           self.config.model_dir / ('temporary' + str(i)))
+                           os.path.join(self.config.model_dir, ('temporary' + str(i))))
                 best_model = i
 
         # Save a trained model and the associated configuration
-        checkpoint = torch.load(self.config.model_dir / ('temporary' + str(best_model)))
+        checkpoint = torch.load(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         model.load_state_dict(checkpoint['state_dict'])
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
         output_model_file = os.path.join(self.config.model_dir, WEIGHTS_NAME)
@@ -503,7 +503,7 @@ class FinBert(object):
         output_config_file = os.path.join(self.config.model_dir, CONFIG_NAME)
         with open(output_config_file, 'w') as f:
             f.write(model_to_save.config.to_json_string())
-        os.remove(self.config.model_dir / ('temporary' + str(best_model)))
+        os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         return model
 
     def evaluate(self, model, examples):
