@@ -2,6 +2,7 @@
 models/sentiment/finbert/
 models/classifier_model/finbert-sentiment/
 finbert/__pycache__/
+wandb/
 
 # Checkpoint
 *.bin
