@@ -1,0 +1,5 @@
+# Directory
+models/sentiment/finbert/
+
+# Checkpoint
+*.bin
