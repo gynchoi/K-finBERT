@@ -62,3 +62,14 @@ I got durring run K-finBERT
     ```
 
 4. NLTK error
+    ```bash
+    LookupError: 
+        Resource punkt not found.
+        Please use the NLTK Downloader to obtain the resource:
+        ...
+    ```
+    *Solution*
+    ```python
+    import nltk
+    nltk.download('punkt')
+    ```

@@ -17,10 +17,15 @@ import os
 from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 from transformers import AutoTokenizer
 
+import wandb
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 logger = logging.getLogger(__name__)
 
 # tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+# tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
     
 class Config(object):
     """The configuration class for training."""
@@ -174,8 +179,8 @@ class FinBert(object):
         self.num_labels = len(label_list)
         self.label_list = label_list
 
-        # self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
-        self.tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+        self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
+        # self.tokenizer = KoBertTokenizer.from_pretrained(self.base_model)
         
     def get_data(self, phase):
         """
@@ -386,8 +391,9 @@ class FinBert(object):
         step_number = len(train_dataloader)
 
         i = 0
+        ep=0
         for _ in trange(int(self.config.num_train_epochs), desc="Epoch"):
-
+            print(f"Current epoch is {ep}")
             model.train()
 
             tr_loss = 0
@@ -449,6 +455,8 @@ class FinBert(object):
                     self.scheduler.step()
                     self.optimizer.zero_grad()
                     global_step += 1
+                
+                wandb.log({'Loss':loss, 'Epoch':ep})
 
             # Validation
 
@@ -480,10 +488,10 @@ class FinBert(object):
                     nb_valid_steps += 1
 
             valid_loss = valid_loss / nb_valid_steps
+            wandb.log({'Valid Loss':valid_loss, 'Epoch':ep})
 
             self.validation_losses.append(valid_loss)
             print("Validation losses: {}".format(self.validation_losses))
-
             if valid_loss == min(self.validation_losses):
 
                 try:
@@ -494,6 +502,7 @@ class FinBert(object):
                            os.path.join(self.config.model_dir, ('temporary' + str(i))))
                 best_model = i
 
+            ep+=1
         # Save a trained model and the associated configuration
         checkpoint = torch.load(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         model.load_state_dict(checkpoint['state_dict'])
