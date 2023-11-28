@@ -15,6 +15,17 @@ I got durring run K-finBERT
         - joblib==0.13.2
     ```
 
+1. Attribute error
+    It might happens when there is a version conflict between Numpy and Pandas (not always)
+    ```bash
+    AttributeError:type object 'object' has no attribute 'dtype'
+    ```
+    *Solution*
+    ```bash
+    pip install --upgrade numpy
+    pip install --upgrade pandas
+    ```
+
 1. Symbolic Link error in Conda
     This error might happen due to Conda version [Reference](https://github.com/conda/conda/issues/9957)
     ```bash

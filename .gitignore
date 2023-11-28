@@ -1,5 +1,6 @@
 # Directory
 models/sentiment/finbert/
+finbert/__pycache__/
 
 # Checkpoint
 *.bin
