@@ -25,8 +25,8 @@ parser.add_argument('--partial', action="store_true")
 parser.add_argument('--epochs', default=4, type=int, help="number of epochs for training")
 # Paths
 parser.add_argument('--lm_path', default="./models/sentiment/finbert",type=str, help='The BERT model to be used')
-parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment",type=str, help='The path where the resulting model will be saved')
-parser.add_argument('--cl_data_path', default="./data/sentiment_data/",type=str, help='Path to the text file.')
+parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment/finance",type=str, help='The path where the resulting model will be saved')
+parser.add_argument('--cl_data_path', default="./data/sentiment_data/finance",type=str, help='Path to the text file.')
 # Wandb
 parser.add_argument('--name', default=None, type=str, help='Wandb run name')
 

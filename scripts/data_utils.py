@@ -24,7 +24,8 @@ Transformed
     }
                 
 """
-
+from sklearn.model_selection import train_test_split
+import pandas as pd
 import argparse
 import json
 import glob
@@ -32,7 +33,7 @@ import csv
 import os
 
 parser = argparse.ArgumentParser(description='Sentiment analyzer')
-parser.add_argument('--data_path', default="/home/guest/workspace/K-finBERT/data/raw_data/VL_뉴스_금융.zip", type=str, help='Path to the text file.')
+parser.add_argument('--data_path', default="/home/guest/workspace/K-finBERT/data/raw_data/finance_data.csv", type=str, help='Path to the text file.')
 
 def make_csv(data_path):
     with open(data_path, 'r', encoding='UTF8') as f:
@@ -58,36 +59,57 @@ def make_text(data_path):
 
         wr.writerow([text])  
 
+def translate(data_path):
+    csv_data = pd.read_csv(data_path, encoding='UTF8')
+
+    df = pd.DataFrame()
+    df.index.name = 'id'
+    df['text'] = csv_data['kor_sentence']
+    df['label'] = csv_data['labels']
+    df.to_csv('./data/sentiment_data/finance/finance.csv')
+
+    return df
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
     if not os.path.exists('./data/sentiment_data'):
         os.makedirs('./data/sentiment_data')
 
-    paths = glob.glob(os.path.join(args.data_path, "*.json"))
+    if 'zip' in args.data_path:
+        paths = glob.glob(os.path.join(args.data_path, "*.json"))
 
-    if "TL" in args.data_path:
-        phase = "train"
-    elif "VL" in args.data_path:
-        phase = "validation"
+        if "TL" in args.data_path:
+            phase = "train"
+        elif "VL" in args.data_path:
+            phase = "validation"
 
-    f = open(f'./data/sentiment_data/{phase}.csv', 'w', encoding='utf-8', newline='')
-    wr = csv.writer(f, delimiter='\t')
-    wr.writerow(["id", "text","label"])
-
-    for path in paths:
-        make_csv(path)
-    f.close()
-
-    print(f"Finish: sentiment_data/{phase}.csv")
-
-    if phase == "validation":
-        f = open(f'./data/sentiment_data/test.txt', 'w', encoding='utf-8', newline='')
+        f = open(f'./data/sentiment_data/aihub/{phase}.csv', 'w', encoding='utf-8', newline='')
         wr = csv.writer(f, delimiter='\t')
+        wr.writerow(["id", "text","label"])
 
         for path in paths:
-            make_text(path)
+            make_csv(path)
         f.close()
 
-        print(f"Additional file: sentiment_data/test.txt")
+        print(f"Finish: sentiment_data/aihub/{phase}.csv")
+
+        if phase == "validation":
+            f = open(f'./data/sentiment_data/aihub/test.txt', 'w', encoding='utf-8', newline='')
+            wr = csv.writer(f, delimiter='\t')
+
+            for path in paths:
+                make_text(path)
+            f.close()
+
+            print(f"Additional file: sentiment_data/aihub/test.txt")
+
+    elif 'finance' in args.data_path:
+        data = translate(args.data_path)
+
+        train, test = train_test_split(data, test_size=0.2, random_state=0)
+        train, valid = train_test_split(train, test_size=0.1, random_state=0)
+        train.to_csv('data/sentiment_data/finance/train.csv',sep='\t')
+        test.to_csv('data/sentiment_data/finance/test.csv',sep='\t')
+        valid.to_csv('data/sentiment_data/finance/validation.csv',sep='\t')
 
