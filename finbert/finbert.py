@@ -179,8 +179,10 @@ class FinBert(object):
         self.num_labels = len(label_list)
         self.label_list = label_list
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
-        # self.tokenizer = KoBertTokenizer.from_pretrained(self.base_model)
+        if self.base_model == 'monologg/kobert':
+            self.tokenizer = KoBertTokenizer.from_pretrained(self.base_model)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
         
     def get_data(self, phase):
         """
@@ -387,7 +389,8 @@ class FinBert(object):
         train_dataloader = self.get_loader(train_examples, 'train')
 
         model.train()
-
+        if self.base_model == 'bert-base-multilingual-cased':
+            model.resize_token_embeddings(len(tokenizer))
         step_number = len(train_dataloader)
 
         i = 0
@@ -619,7 +622,7 @@ def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name=
         size of batching chunks
     """
     model.eval()
-
+    model.resize_token_embeddings(len(tokenizer))
     sentences = sent_tokenize(text)
 
     device = gpu_name if use_gpu and torch.cuda.is_available() else "cpu"
