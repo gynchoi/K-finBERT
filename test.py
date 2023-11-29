@@ -13,10 +13,9 @@ import nltk
 nltk.download('punkt')
 
 parser = argparse.ArgumentParser(description='Sentiment analyzer')
-parser.add_argument('-a', action="store_true", default=False)
 parser.add_argument('--text_path', default="./data/sentiment_data/test.txt",type=str, help='Path to the text file.')
 parser.add_argument('--output_dir', default="./data",type=str, help='Where to write the results')
-parser.add_argument('--model_path', default="./models/sentiment/finbert",type=str, help='Path to classifier model')
+parser.add_argument('--model_path', default="./models/classifier_model/finbert-sentiment",type=str, help='Path to classifier model')
 
 args = parser.parse_args()
 

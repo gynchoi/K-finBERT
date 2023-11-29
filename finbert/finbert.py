@@ -13,14 +13,19 @@ from finbert.utils import *
 from finbert.tokenization_kobert import KoBertTokenizer
 import numpy as np
 import logging
-
+import os
 from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 from transformers import AutoTokenizer
+
+import wandb
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 logger = logging.getLogger(__name__)
 
 # tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+# tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
     
 class Config(object):
     """The configuration class for training."""
@@ -174,8 +179,10 @@ class FinBert(object):
         self.num_labels = len(label_list)
         self.label_list = label_list
 
-        # self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
-        self.tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+        if self.base_model == 'monologg/kobert':
+            self.tokenizer = KoBertTokenizer.from_pretrained(self.base_model)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
         
     def get_data(self, phase):
         """
@@ -382,12 +389,14 @@ class FinBert(object):
         train_dataloader = self.get_loader(train_examples, 'train')
 
         model.train()
-
+        if self.base_model == 'bert-base-multilingual-cased':
+            model.resize_token_embeddings(len(tokenizer))
         step_number = len(train_dataloader)
 
         i = 0
+        ep=0
         for _ in trange(int(self.config.num_train_epochs), desc="Epoch"):
-
+            print(f"Current epoch is {ep}")
             model.train()
 
             tr_loss = 0
@@ -449,6 +458,8 @@ class FinBert(object):
                     self.scheduler.step()
                     self.optimizer.zero_grad()
                     global_step += 1
+                
+                wandb.log({'Loss':loss, 'Epoch':ep})
 
             # Validation
 
@@ -480,22 +491,23 @@ class FinBert(object):
                     nb_valid_steps += 1
 
             valid_loss = valid_loss / nb_valid_steps
+            wandb.log({'Valid Loss':valid_loss, 'Epoch':ep})
 
             self.validation_losses.append(valid_loss)
             print("Validation losses: {}".format(self.validation_losses))
-
             if valid_loss == min(self.validation_losses):
 
                 try:
-                    os.remove(self.config.model_dir / ('temporary' + str(best_model)))
+                    os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
                 except:
                     print('No best model found')
                 torch.save({'epoch': str(i), 'state_dict': model.state_dict()},
-                           self.config.model_dir / ('temporary' + str(i)))
+                           os.path.join(self.config.model_dir, ('temporary' + str(i))))
                 best_model = i
 
+            ep+=1
         # Save a trained model and the associated configuration
-        checkpoint = torch.load(self.config.model_dir / ('temporary' + str(best_model)))
+        checkpoint = torch.load(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         model.load_state_dict(checkpoint['state_dict'])
         model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
         output_model_file = os.path.join(self.config.model_dir, WEIGHTS_NAME)
@@ -503,7 +515,7 @@ class FinBert(object):
         output_config_file = os.path.join(self.config.model_dir, CONFIG_NAME)
         with open(output_config_file, 'w') as f:
             f.write(model_to_save.config.to_json_string())
-        os.remove(self.config.model_dir / ('temporary' + str(best_model)))
+        os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         return model
 
     def evaluate(self, model, examples):
@@ -610,7 +622,7 @@ def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name=
         size of batching chunks
     """
     model.eval()
-
+    # model.resize_token_embeddings(len(tokenizer))
     sentences = sent_tokenize(text)
 
     device = gpu_name if use_gpu and torch.cuda.is_available() else "cpu"

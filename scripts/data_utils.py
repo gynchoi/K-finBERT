@@ -32,9 +32,9 @@ import csv
 import os
 
 parser = argparse.ArgumentParser(description='Sentiment analyzer')
-parser.add_argument('--data_path', default="C:/Users/gynch/workspace/TL_뉴스_금융.zip", type=str, help='Path to the text file.')
+parser.add_argument('--data_path', default="/home/guest/workspace/K-finBERT/data/raw_data/VL_뉴스_금융.zip", type=str, help='Path to the text file.')
 
-def read_and_write(data_path):
+def make_csv(data_path):
     with open(data_path, 'r', encoding='UTF8') as f:
         json_data= json.load(f)
 
@@ -48,6 +48,15 @@ def read_and_write(data_path):
 
         wr.writerow([id, text, label_dict[key]])
     
+def make_text(data_path):
+    with open(data_path, 'r', encoding='UTF8') as f:
+        json_data= json.load(f)
+
+    values = json_data["annotation"]
+    for val in values:
+        text = val["text"]
+
+        wr.writerow([text])  
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -67,9 +76,18 @@ if __name__ == "__main__":
     wr.writerow(["id", "text","label"])
 
     for path in paths:
-        read_and_write(path)
-
+        make_csv(path)
     f.close()
 
     print(f"Finish: sentiment_data/{phase}.csv")
+
+    if phase == "validation":
+        f = open(f'./data/sentiment_data/test.txt', 'w', encoding='utf-8', newline='')
+        wr = csv.writer(f, delimiter='\t')
+
+        for path in paths:
+            make_text(path)
+        f.close()
+
+        print(f"Additional file: sentiment_data/test.txt")
 

@@ -11,19 +11,24 @@ import sys
 sys.path.append('..')
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+import wandb
 
 from sklearn.metrics import classification_report
 from transformers import AutoModelForSequenceClassification
 
 from finbert.finbert import *
+from finbert.seed import fix_seed
 
 parser = argparse.ArgumentParser(description='Sentiment analyzer')
+# Fine tuning
 parser.add_argument('--partial', action="store_true")
-parser.add_argument('--max_epochs', default=4, type=int, help="number of epochs for training")
+parser.add_argument('--epochs', default=4, type=int, help="number of epochs for training")
+# Paths
 parser.add_argument('--lm_path', default="./models/sentiment/finbert",type=str, help='The BERT model to be used')
 parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment",type=str, help='The path where the resulting model will be saved')
 parser.add_argument('--cl_data_path', default="./data/sentiment_data/",type=str, help='Path to the text file.')
-
+# Wandb
+parser.add_argument('--name', default=None, type=str, help='Wandb run name')
 
 def configure_training(args):
     # Configuring training parameters
@@ -37,7 +42,7 @@ def configure_training(args):
 
     config = Config(data_dir=args.cl_data_path,
                     bert_model=bertmodel,
-                    num_train_epochs=args.max_epochs,
+                    num_train_epochs=args.epochs,
                     model_dir=args.cl_path,
                     max_seq_length = 48,
                     train_batch_size = 32,
@@ -49,7 +54,9 @@ def configure_training(args):
                     gradual_unfreeze=True)
 
     finbert = FinBert(config)
-    finbert.base_model = 'bert-base-uncased'
+    # finbert.base_model = 'bert-base-uncased'
+    finbert.base_model = 'monologg/kobert'
+    # finbert.base_model = 'bert-base-multilingual-cased'
     finbert.config.discriminate=True
     finbert.config.gradual_unfreeze=True
     finbert.prepare_model(label_list=['positive','negative','neutral'])
@@ -105,9 +112,15 @@ def report(df, cols=['label','prediction','logits']):
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    # Wandb logging
+    if args.name is None:
+        args.name = f'epoch_{args.epochs}'
+    wandb.init(project='K-finBERT', name=args.name, entity="gynchoi17")
+
     # Modules
     project_dir = Path.cwd().parent
     pd.set_option('max_colwidth', -1)
+    fix_seed(42)
 
     logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S',
