@@ -4,6 +4,13 @@ This repository is fine-tuning FinBERT with Korean financial sentence dataset fr
 Also, you can view learning curves in the [wandb](https://wandb.ai/gynchoi17/K-finBERT/overview?workspace=user-gynchoi17)
 
 ## Prepare Datasets
+**Finance Sentiment Corpus**\
+This dataset translate 'Finance Phrase Bank' from English to Korean
+
+*Download*\
+[Finance Sentiment Corpus](https://github.com/ukairia777/finance_sentiment_corpus)
+
+**AIHub**\
 The Korean sentence dataset labeled from news, magazines, broadcast scripts, blogs, and books format with various categories, like history, society, finance, IT sience, and etc. Sentence is labeld by
 - type: conversation/fact/inference/predict
 - certainty: certain/uncertain
@@ -12,12 +19,13 @@ The Korean sentence dataset labeled from news, magazines, broadcast scripts, blo
 
 We only use the finance news dataset for training.
 
-**Download**\
+*Download*\
 Download the '문장 유형(추론, 예측 등) 판단 데이터' dataset from [AIHub](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=data&dataSetSn=71486). As the dataset is split compressed, a program that supports split decompression (e.g. Bandizip, 7-Zip) is recommended.
 
 **Preprocess**\
 Dataset should be preprocessed to {'ID': int, 'Text': str, 'Label': str} form and saved as csv with delimiter='\t'. 
 ```bash
+python ./scripts/data_utils.py --data_path "your_directory/finance_data.csv"
 python ./scripts/data_utils.py --data_path "your_directory/TL_뉴스_금융.zip" # not zip file but folder
 python ./scripts/data_utils.py --data_path "your_directory/VL_뉴스_금융.zip"
 ```
@@ -51,6 +59,8 @@ If you got `git: 'lfs' is not a git command. See 'git --help` error, install git
 sudo apt install git-lfs
 ```
 ## Minor Modifications
+You can neglect belows, if you clone this repository.
+
 **Tokenizer**\
 For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' to 'monologg/kobert'. To use KoBERT tokenizer
 1. Copy [tokenization_kobert.py](https://github.com/monologg/KoBERT-Transformers/blob/master/kobert_transformers/tokenization_kobert.py) to ./finbert/ folder
@@ -64,11 +74,6 @@ For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' 
 
     # tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased') # remove this code
     tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
-
-    ...
-
-    # self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case) # remove this code
-    self.tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
     ```
 \
 **Encoding**\
