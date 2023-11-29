@@ -1,5 +1,7 @@
 # K-FinBERT: Korean Financial Sentiment Analysis with BERT
-This repository is fine-tuning FinBERT with Korean financial sentence dataset from AIHub. For detailed information about FinBERT, see the [FinBERT](https://github.com/ProsusAI/finBERT)
+This repository is fine-tuning FinBERT with Korean financial sentence dataset from AIHub. For detailed information about FinBERT, see the [FinBERT](https://github.com/ProsusAI/finBERT).
+
+Also, you can view learning curves in the [wandb](https://wandb.ai/gynchoi17/K-finBERT/overview?workspace=user-gynchoi17)
 
 ## Prepare Datasets
 The Korean sentence dataset labeled from news, magazines, broadcast scripts, blogs, and books format with various categories, like history, society, finance, IT sience, and etc. Sentence is labeld by
@@ -35,12 +37,6 @@ conda env create -f environment.yml
 conda activate finbert
 ```
 
-<!-- *Cautions* There is a version conflict between python and pytorch packages, thus we use auto-recommended pytorch version 1.13.1. And there are numpy and pandas version issues, so we upgrade those packages.
-```bash
-pip install pandas --upgrade # v1.3.5
-pip install numpy --upgrade # v1.21.6
-```
-\ -->
 **Pre-trained model Checkpoints**
 Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert). 
 ```bash
