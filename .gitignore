@@ -1,7 +1,11 @@
 # Directory
+models/
 models/sentiment/finbert/
 models/classifier_model/finbert-sentiment/
+data/
+data/raw_data/
 finbert/__pycache__/
+aihub/
 wandb/
 
 # Checkpoint
