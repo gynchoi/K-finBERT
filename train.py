@@ -23,7 +23,6 @@ parser = argparse.ArgumentParser(description='Sentiment analyzer')
 # Fine tuning
 parser.add_argument('--partial', action="store_true")
 parser.add_argument('--epochs', default=4, type=int, help="number of epochs for training")
-parser.add_argument('--tokenizer', default='kobert', type=str, help="number of epochs for training")
 # Paths
 parser.add_argument('--lm_path', default="./models/sentiment/finbert",type=str, help='The BERT model to be used')
 parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment",type=str, help='The path where the resulting model will be saved')
@@ -56,8 +55,8 @@ def configure_training(args):
 
     finbert = FinBert(config)
     # finbert.base_model = 'bert-base-uncased'
-    # finbert.base_model = 'monologg/kobert'
-    finbert.base_model = 'bert-base-multilingual-cased'
+    finbert.base_model = 'monologg/kobert'
+    # finbert.base_model = 'bert-base-multilingual-cased'
     finbert.config.discriminate=True
     finbert.config.gradual_unfreeze=True
     finbert.prepare_model(label_list=['positive','negative','neutral'])

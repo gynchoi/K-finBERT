@@ -24,8 +24,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 logger = logging.getLogger(__name__)
 
 # tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-# tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
-tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
+tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
+# tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
     
 class Config(object):
     """The configuration class for training."""
@@ -622,7 +622,7 @@ def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name=
         size of batching chunks
     """
     model.eval()
-    model.resize_token_embeddings(len(tokenizer))
+    # model.resize_token_embeddings(len(tokenizer))
     sentences = sent_tokenize(text)
 
     device = gpu_name if use_gpu and torch.cuda.is_available() else "cpu"

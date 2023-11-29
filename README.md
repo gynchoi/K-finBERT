@@ -12,10 +12,10 @@ The Korean sentence dataset labeled from news, magazines, broadcast scripts, blo
 
 We only use the finance news dataset for training.
 
-**Download**
+**Download**\
 Download the '문장 유형(추론, 예측 등) 판단 데이터' dataset from [AIHub](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=data&dataSetSn=71486). As the dataset is split compressed, a program that supports split decompression (e.g. Bandizip, 7-Zip) is recommended.
 
-**Preprocess**
+**Preprocess**\
 Dataset should be preprocessed to {'ID': int, 'Text': str, 'Label': str} form and saved as csv with delimiter='\t'. 
 ```bash
 python ./scripts/data_utils.py --data_path "your_directory/TL_뉴스_금융.zip" # not zip file but folder
@@ -24,20 +24,20 @@ python ./scripts/data_utils.py --data_path "your_directory/VL_뉴스_금융.zip"
 
 
 ## Installing
-**Repository**
+**Repository**\
 Clone this repository
 ```bash
 git clone https://github.com/gynchoi/finBERT.git
 ```
 \
-**Environments**
+**Environments**\
 Create the Conda environment
 ```bash
 conda env create -f environment.yml
 conda activate finbert
 ```
 
-**Pre-trained model Checkpoints**
+**Pre-trained model Checkpoints**\
 Download the original FinBERT checkpoint from [HuggingFace/FinBERT](https://huggingface.co/ProsusAI/finbert). 
 ```bash
 mkdir models/sentiment
@@ -51,7 +51,7 @@ If you got `git: 'lfs' is not a git command. See 'git --help` error, install git
 sudo apt install git-lfs
 ```
 ## Minor Modifications
-**Tokenizer**
+**Tokenizer**\
 For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' to 'monologg/kobert'. To use KoBERT tokenizer
 1. Copy [tokenization_kobert.py](https://github.com/monologg/KoBERT-Transformers/blob/master/kobert_transformers/tokenization_kobert.py) to ./finbert/ folder
 2. Download sentencepiece package, unless you may get `UnboundLocalError: local variable 'spm' referenced before assignment` error
@@ -71,26 +71,29 @@ For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' 
     self.tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
     ```
 \
-**Encoding**
+**Encoding**\
 When open Korean dataset, encoding is needed. Change the './finbert/utils' as below
 ```python
 # with open(input_file, "r") as f
 with open(input_file, "r",  encoding='utf-8') as f
 ```
 \
-**Trainer**
+**Trainer**\
 Since original FinBERT trainer code is presented with jupyter notebook, we rewrite the './notebooks/finbert_training.ipynb' to python format
 1. Joining paths in 'finbert.py' with OS package
 ```python
 # self.config.model_dir / ('temporary' + str(best_model)
 import os
 
-os.path.join(self.config.model_dir, ('temporary' + str(best_model))
+os.path.join(self.config.model_dir, ('temporary' + str(best_model)))
 ```
 
-**Test**
+**Test**\
 From predict.py, we need to download and import nltk 
 ```python
 import nltk
 nltk.download('punkt')
 ```
+
+## Errors Report
+You can view expected errors and some solutions in [ERRORS.md](https://github.com/gynchoi/K-finBERT/blob/master/ERRORS.md)
