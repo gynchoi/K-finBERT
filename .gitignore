@@ -5,8 +5,10 @@ models/classifier_model/finbert-sentiment/
 data/
 data/raw_data/
 finbert/__pycache__/
+finbert/tokenization_hanbert.py
 aihub/
 wandb/
 
 # Checkpoint
 *.bin
+*.csv
