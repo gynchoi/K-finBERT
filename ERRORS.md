@@ -1,5 +1,5 @@
 # ERRORS
-I got durring run K-finBERT
+I got during run K-finBERT
 
 0. Environment download error. 
     In Windows11, I got a version conflict error between python and torch, so install recommended torch version instead of 1.1.0. And in Linux (Ubuntu), I got conda error below

@@ -25,10 +25,16 @@ parser.add_argument('--partial', action="store_true")
 parser.add_argument('--epochs', default=4, type=int, help="number of epochs for training")
 # Paths
 parser.add_argument('--lm_path', default="./models/sentiment/finbert",type=str, help='The BERT model to be used')
-parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment/finance",type=str, help='The path where the resulting model will be saved')
+parser.add_argument('--cl_path', default="./models/classifier_model/finbert-sentiment/",type=str, help='The path where the resulting model will be saved')
 parser.add_argument('--cl_data_path', default="./data/sentiment_data/finance",type=str, help='Path to the text file.')
+# Config
+parser.add_argument('--tokenizer', default='HanBert-54kN-IP-torch', type=str, help='Pretrained type of BERT tokenizer') 
+parser.add_argument('--batch_size', default=32, type=int, help='Training batch size')
+parser.add_argument('--lr', default=2e-5, type=float, help='Learning rate')
+parser.add_argument('--warmup', default=0.2, type=float, help='Warmup proportion')
 # Wandb
 parser.add_argument('--name', default=None, type=str, help='Wandb run name')
+parser.add_argument('--project', default='Optim_K-finBERT', type=str, help='Wandb project name')
 
 def configure_training(args):
     # Configuring training parameters
@@ -39,24 +45,21 @@ def configure_training(args):
 
     bertmodel = AutoModelForSequenceClassification.from_pretrained(args.lm_path,cache_dir=None, num_labels=3)
 
-
     config = Config(data_dir=args.cl_data_path,
                     bert_model=bertmodel,
                     num_train_epochs=args.epochs,
                     model_dir=args.cl_path,
                     max_seq_length = 48,
-                    train_batch_size = 32,
-                    learning_rate = 2e-5,
+                    train_batch_size=args.batch_size,
+                    learning_rate=args.lr,
                     output_mode='classification',
-                    warm_up_proportion=0.2,
+                    warm_up_proportion=args.warmup,
                     local_rank=-1,
                     discriminate=True,
                     gradual_unfreeze=True)
 
     finbert = FinBert(config)
-    # finbert.base_model = 'bert-base-uncased'
-    finbert.base_model = 'monologg/kobert'
-    # finbert.base_model = 'bert-base-multilingual-cased'
+    finbert.base_model = args.tokenizer
     finbert.config.discriminate=True
     finbert.config.gradual_unfreeze=True
     finbert.prepare_model(label_list=['positive','negative','neutral'])
@@ -77,20 +80,18 @@ def subsettuning(model):
 
     return model
 
-def training(finbert, args):
+def train_finbert(finbert, args):
     train_data = finbert.get_data('train')
     model = finbert.create_the_model()
 
     if args.partial:
         model = subsettuning(model)
 
-    # Training
     trained_model = finbert.train(train_examples = train_data, model = model)
 
     return trained_model
 
-def eval(finbert, trained_model):
-    # Test
+def eval_finbert(finbert, trained_model):
     test_data = finbert.get_data('test')
     results = finbert.evaluate(examples=test_data, model=trained_model)
 
@@ -107,6 +108,8 @@ def report(df, cols=['label','prediction','logits']):
     print("\nClassification Report:")
     print(classification_report(df[cols[0]], df[cols[1]]))
 
+    wandb.log({'Eval Loss': loss, 'Eval Acc': (df[cols[0]] == df[cols[1]]).sum() / df.shape[0]})
+
 
 
 if __name__ == "__main__":
@@ -115,7 +118,9 @@ if __name__ == "__main__":
     # Wandb logging
     if args.name is None:
         args.name = f'epoch_{args.epochs}'
-    wandb.init(project='K-finBERT', name=args.name, entity="gynchoi17")
+    wandb.init(project=args.project, name=args.name, entity="gynchoi17")
+    wandb.config.update(args)
+    args.cl_path = os.path.join(args.cl_path, args.name)
 
     # Modules
     project_dir = Path.cwd().parent
@@ -128,8 +133,8 @@ if __name__ == "__main__":
     
     finbert = configure_training(args)
     
-    trained_model = training(finbert, args)
-    results = eval(finbert, trained_model)
+    trained_model = train_finbert(finbert, args)
+    results = eval_finbert(finbert, trained_model)
 
     results['prediction'] = results.predictions.apply(lambda x: np.argmax(x,axis=0))
     report(results,cols=['labels','prediction','predictions'])

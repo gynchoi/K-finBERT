@@ -33,7 +33,7 @@ import csv
 import os
 
 parser = argparse.ArgumentParser(description='Sentiment analyzer')
-parser.add_argument('--data_path', default="/home/guest/workspace/K-finBERT/data/raw_data/finance_data.csv", type=str, help='Path to the text file.')
+parser.add_argument('--data_path', default="/home/guest/workspace/K-finBERT/data/sentiment_data/finance_aug/finance_augmented.csv", type=str, help='Path to the text file.')
 
 def make_csv(data_path):
     with open(data_path, 'r', encoding='UTF8') as f:
@@ -109,7 +109,6 @@ if __name__ == "__main__":
 
         train, test = train_test_split(data, test_size=0.2, random_state=0)
         train, valid = train_test_split(train, test_size=0.1, random_state=0)
-        train.to_csv('data/sentiment_data/finance/train.csv',sep='\t')
-        test.to_csv('data/sentiment_data/finance/test.csv',sep='\t')
-        valid.to_csv('data/sentiment_data/finance/validation.csv',sep='\t')
-
+        train.to_csv('data/sentiment_data/finance_aug/train.csv',sep='\t')
+        test.to_csv('data/sentiment_data/finance_aug/test.csv',sep='\t')
+        valid.to_csv('data/sentiment_data/finance_aug/validation.csv',sep='\t')
