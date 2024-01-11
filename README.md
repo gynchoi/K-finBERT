@@ -1,7 +1,7 @@
 # K-FinBERT: Korean Financial Sentiment Analysis with BERT
 This repository is fine-tuning FinBERT with Korean financial sentence dataset from AIHub. For detailed information about FinBERT, see the [FinBERT](https://github.com/ProsusAI/finBERT).
 
-Also, you can view learning curves in the [wandb](https://wandb.ai/gynchoi17/K-finBERT/overview?workspace=user-gynchoi17)
+Also, you can view learning curves in the [wandb](https://wandb.ai/gynchoi17/Optim_K-finBERT/workspace?workspace=user-gynchoi17)
 
 ## Prepare Datasets
 **Finance Sentiment Corpus**\
@@ -16,8 +16,6 @@ The Korean sentence dataset labeled from news, magazines, broadcast scripts, blo
 - certainty: certain/uncertain
 - temporality: past/present/future
 - sentiment: positive/negative/neutral
-
-We only use the finance news dataset for training.
 
 *Download*\
 Download the '문장 유형(추론, 예측 등) 판단 데이터' dataset from [AIHub](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=data&dataSetSn=71486). As the dataset is split compressed, a program that supports split decompression (e.g. Bandizip, 7-Zip) is recommended.
@@ -59,22 +57,15 @@ If you got `git: 'lfs' is not a git command. See 'git --help` error, install git
 sudo apt install git-lfs
 ```
 ## Minor Modifications
-You can neglect belows, if you clone this repository.
-
 **Tokenizer**\
-For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' to 'monologg/kobert'. To use KoBERT tokenizer
+For utilizing the Korean dataset, tokenizer is changed from 'bert-base-uncased' to 'monologg/kobert' and 'bert-base-multilingual-cased'. To use KoBERT tokenizer
 1. Copy [tokenization_kobert.py](https://github.com/monologg/KoBERT-Transformers/blob/master/kobert_transformers/tokenization_kobert.py) to ./finbert/ folder
 2. Download sentencepiece package, unless you may get `UnboundLocalError: local variable 'spm' referenced before assignment` error
     ```bash
     pip install sentencepiecc
     ```
 3. Modify the './finbert/finbert.py' code
-    ```python
-    from finbert.tokenization_kobert import KoBertTokenizer
 
-    # tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased') # remove this code
-    tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
-    ```
 \
 **Encoding**\
 When open Korean dataset, encoding is needed. Change the './finbert/utils' as below

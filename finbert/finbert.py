@@ -11,6 +11,7 @@ from tqdm import trange
 from nltk.tokenize import sent_tokenize
 from finbert.utils import *
 from finbert.tokenization_kobert import KoBertTokenizer
+from finbert.tokenization_hanbert import HanBertTokenizer
 import numpy as np
 import logging
 import os
@@ -23,10 +24,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 logger = logging.getLogger(__name__)
 
-# tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-tokenizer = KoBertTokenizer.from_pretrained('monologg/kobert')
-# tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-cased')
-    
 class Config(object):
     """The configuration class for training."""
 
@@ -181,6 +178,8 @@ class FinBert(object):
 
         if self.base_model == 'monologg/kobert':
             self.tokenizer = KoBertTokenizer.from_pretrained(self.base_model)
+        if self.base_model == 'HanBert-54kN-IP-torch':
+            self.tokenizer = HanBertTokenizer.from_pretrained(self.base_model)
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(self.base_model, do_lower_case=self.config.do_lower_case)
         
@@ -389,8 +388,7 @@ class FinBert(object):
         train_dataloader = self.get_loader(train_examples, 'train')
 
         model.train()
-        if self.base_model == 'bert-base-multilingual-cased':
-            model.resize_token_embeddings(len(tokenizer))
+        model.resize_token_embeddings(len(self.tokenizer))
         step_number = len(train_dataloader)
 
         i = 0
@@ -487,25 +485,23 @@ class FinBert(object):
                         tmp_valid_loss = loss_fct(logits.view(-1), label_ids.view(-1))
 
                     valid_loss += tmp_valid_loss.mean().item()
-
                     nb_valid_steps += 1
 
             valid_loss = valid_loss / nb_valid_steps
-            wandb.log({'Valid Loss':valid_loss, 'Epoch':ep})
+            wandb.log({'Valid Loss': valid_loss, 'Epoch': ep})
 
             self.validation_losses.append(valid_loss)
             print("Validation losses: {}".format(self.validation_losses))
             if valid_loss == min(self.validation_losses):
-
                 try:
                     os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
                 except:
                     print('No best model found')
-                torch.save({'epoch': str(i), 'state_dict': model.state_dict()},
-                           os.path.join(self.config.model_dir, ('temporary' + str(i))))
+                torch.save({'epoch': str(i), 'state_dict': model.state_dict()}, os.path.join(self.config.model_dir, ('temporary' + str(i))))
                 best_model = i
 
             ep+=1
+
         # Save a trained model and the associated configuration
         checkpoint = torch.load(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
         model.load_state_dict(checkpoint['state_dict'])
@@ -516,6 +512,7 @@ class FinBert(object):
         with open(output_config_file, 'w') as f:
             f.write(model_to_save.config.to_json_string())
         os.remove(os.path.join(self.config.model_dir, ('temporary' + str(best_model))))
+
         return model
 
     def evaluate(self, model, examples):
@@ -601,7 +598,7 @@ class FinBert(object):
         return evaluation_df
 
 
-def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name='cuda:0', batch_size=5):
+def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name='cuda:0', batch_size=5, args=None):
     """
     Predict sentiments of sentences in a given text. The function first tokenizes sentences, make predictions and write
     results.
@@ -621,8 +618,16 @@ def predict(text, model, write_to_csv=False, path=None, use_gpu=False, gpu_name=
     batch_size: (optional): int
         size of batching chunks
     """
+
+    if args.tokenizer == 'monologg/kobert':
+        tokenizer = KoBertTokenizer.from_pretrained(args.tokenizer)
+    elif args.base_model == 'HanBert-54kN-IP-torch':
+        tokenizer = HanBertTokenizer.from_pretrained(args.tokenizer)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+
     model.eval()
-    # model.resize_token_embeddings(len(tokenizer))
+    model.resize_token_embeddings(len(tokenizer))
     sentences = sent_tokenize(text)
 
     device = gpu_name if use_gpu and torch.cuda.is_available() else "cpu"
